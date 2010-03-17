@@ -31,7 +31,6 @@ module ScribdFu
 
   # RegExp that matches AWS S3 URLs
   S3 = /^https?:\/\/s3.amazonaws.com/
-  CLOUD_FRONT = /^http:\/\/[A-Za-z0-9]*.cloudfront.net/
 
   # Available parameters for the JS API
   # http://www.scribd.com/publisher/api/api?method_name=Javascript+API
@@ -115,7 +114,7 @@ module ScribdFu
       include InstanceMethods
 
       after_save :upload_to_scribd # This *MUST* be an after_save
-      before_destroy :destroy_ipaper_document
+      #before_destroy :destroy_ipaper_document
     end
 
     private
@@ -223,17 +222,18 @@ module ScribdFu
 
     # Display the iPaper document in a view
     def display_ipaper(options = {})
+      @@ipaper_number ||= 0
+      @@ipaper_number += 1
       <<-END
         <script type="text/javascript" src="http://www.scribd.com/javascripts/view.js"></script>
-        <div id="embedded_flash">#{options.delete(:alt)}</div>
+        <div id="embedded_flash_#{@@ipaper_number}">#{options.delete(:alt)}</div>
         <script type="text/javascript">
-          var scribd_doc = scribd.Document.getDoc(#{ipaper_id}, '#{ipaper_access_key}');
+          var scribd_doc_#{@@ipaper_number} = scribd.Document.getDoc(#{ipaper_id}, '#{ipaper_access_key}');
           #{js_params(options)}
-          scribd_doc.write("embedded_flash");
+          scribd_doc_#{@@ipaper_number}.write("embedded_flash_#{@@ipaper_number}");
         </script>
       END
     end
-
 
     private
 
